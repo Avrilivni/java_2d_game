@@ -1,67 +1,357 @@
-# Making Your First Game in Java
+```html
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ארץ עיר - מסך פתיחה</title>
+    <style>
+        body {
+            font-family: 'Heebo', Arial, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #3498db;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #playerInputs {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ברוכים הבאים למשחק ארץ עיר</h1>
+        <form id="setupForm">
+            <label for="playerCount">מספר שחקנים:</label>
+            <select id="playerCount" onchange="generatePlayerInputs()">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+            
+            <div id="playerInputs"></div>
+            
+            <button type="submit">התחל משחק</button>
+        </form>
+    </div>
 
-Source code for a video game project tutorial on the **Learn Code By Gaming** YouTube channel.
+    <script>
+        function generatePlayerInputs() {
+            const playerCount = document.getElementById('playerCount').value;
+            const playerInputs = document.getElementById('playerInputs');
+            playerInputs.innerHTML = '';
+            
+            for (let i = 1; i <= playerCount; i++) {
+                playerInputs.innerHTML += `
+                    <label for="player${i}">שם שחקן ${i}:</label>
+                    <input type="text" id="player${i}" name="player${i}" required>
+                `;
+            }
+        }
 
-Watch it here: COMING SOON
+        document.getElementById('setupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const playerCount = document.getElementById('playerCount').value;
+            const players = [];
+            
+            for (let i = 1; i <= playerCount; i++) {
+                const playerName = document.getElementById(`player${i}`).value;
+                players.push(playerName);
+            }
+            
+            localStorage.setItem('players', JSON.stringify(players));
+            window.location.href = 'game.html'; // עבור למסך המשחק
+        });
 
+        // יצירת שדות קלט לשחקנים בטעינת הדף
+        generatePlayerInputs();
+    </script>
+</body>
+</html>
+```
 
-# Project Ideas
+```html
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ארץ עיר - משחק</title>
+    <style>
+        body {
+            font-family: 'Heebo', Arial, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            color: #3498db;
+            text-align: center;
+        }
+        .letter-display {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        input[type="text"] {
+            width: 90%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #timer {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #e74c3c;
+        }
+        .hidden {
+            display: none;
+        }
+        #results {
+            margin-top: 30px;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        #scoreboard {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>משחק ארץ עיר</h1>
+        <div class="letter-display" id="randomLetter">א</div>
+        <div id="timer" class="hidden">10</div>
+        <div id="playerForm">
+            <h2 id="playerName"></h2>
+            <form id="gameForm">
+                <table>
+                    <tr>
+                        <th>קטגוריה</th>
+                        <th>תשובה</th>
+                    </tr>
+                    <tr>
+                        <td>ארץ</td>
+                        <td><input type="text" name="country" required></td>
+                    </tr>
+                    <tr>
+                        <td>עיר</td>
+                        <td><input type="text" name="city" required></td>
+                    </tr>
+                    <tr>
+                        <td>חי</td>
+                        <td><input type="text" name="animal" required></td>
+                    </tr>
+                    <tr>
+                        <td>צומח</td>
+                        <td><input type="text" name="plant" required></td>
+                    </tr>
+                    <tr>
+                        <td>דומם</td>
+                        <td><input type="text" name="object" required></td>
+                    </tr>
+                    <tr>
+                        <td>שם של בת</td>
+                        <td><input type="text" name="girlName" required></td>
+                    </tr>
+                    <tr>
+                        <td>שם של בן</td>
+                        <td><input type="text" name="boyName" required></td>
+                    </tr>
+                    <tr>
+                        <td>מקצוע</td>
+                        <td><input type="text" name="profession" required></td>
+                    </tr>
+                </table>
+                <button type="submit" id="submitButton" disabled>סיימתי</button>
+            </form>
+        </div>
+        <div id="results" class="hidden">
+            <h2>תוצאות הסיבוב</h2>
+            <table id="resultsTable"></table>
+            <button onclick="startNewRound()">סיבוב חדש</button>
+        </div>
+        <div id="scoreboard" class="hidden">
+            <h2>טבלת ניקוד</h2>
+            <table id="scoreTable"></table>
+        </div>
+    </div>
 
-## ![Green Circle](images/green-circle.png) Beginner
+    <script>
+        const players = JSON.parse(localStorage.getItem('players')) || ['שחקן 1', 'שחקן 2'];
+        let currentPlayerIndex = 0;
+        let currentLetter = '';
+        let answers = {};
+        let scores = players.reduce((acc, player) => ({ ...acc, [player]: 0 }), {});
+        const categories = ['country', 'city', 'animal', 'plant', 'object', 'girlName', 'boyName', 'profession'];
+        const hebrewCategories = ['ארץ', 'עיר', 'חי', 'צומח', 'דומם', 'שם של בת', 'שם של בן', 'מקצוע'];
 
-- Change the colors that are being used.
-- Change the image files that are being used.
-- Change how many points you get per coin.
-- Make instance or class variables to control hardcoded values like the ones just mentioned.
-- Use WASD instead of arrows for movement.
-- Change the dimensions of the game board.
-- Make a new coin appear whenever the player picks one up.
-- Change the tile size.
-  - Remember to update your image files, or scale the images.
+        function startGame() {
+            chooseLetter();
+            showPlayerForm();
+            updateScoreboard();
+        }
 
-## ![Blue Square](images/blue-square.png) Intermediate
+        function chooseLetter() {
+            const hebrewLetters = 'אבגדהוזחטיכלמנסעפצקרשת';
+            const randomIndex = Math.floor(Math.random() * hebrewLetters.length);
+            currentLetter = hebrewLetters[randomIndex];
+            document.getElementById('randomLetter').textContent = currentLetter;
+        }
 
-- Make coins disappear after some time.
-  - By ticks, or using a separate timer, or after the player has moved so many squares.
-- Make more coins appear at random intervals.
-- Replace the checkered background with an image.
-- Player and Coin share a lot of commonalities. Create a parent class that both of these classes extend from to reduce code duplication.
-- Make a special coin that looks different and is worth more points.
-- End or restart the game when all coins are collected, or when a certain score is reached.
-- Decide what winning means, then redraw the whole canvas with a celebration graphic when you win the game.
-- Add a game clock.
-  - Could count up or down.
-  - Could replace the score or be in addition to the score.
-  - Display it like the score.
-- Keep track of high scores.
-  - In a single play session.
-  - Or across all sessions by reading/writing to a file.
-- Allow the player to wrap around the edges of the board.
+        function showPlayerForm() {
+            document.getElementById('playerName').textContent = players[currentPlayerIndex];
+            document.getElementById('playerForm').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('scoreboard').classList.add('hidden');
+            document.getElementById('submitButton').disabled = true;
+            document.getElementById('gameForm').reset();
+        }
 
-## ![Black Diamond](images/black-diamond.png) Advanced
+        document.getElementById('gameForm').addEventListener('input', function() {
+            const allFilled = [...this.elements].every(element => element.value.trim() !== '');
+            document.getElementById('submitButton').disabled = !allFilled;
+        });
 
-- Add obstacles to block player movement.
-- Add an object type that reduces your score when touched. Or maybe it ends the game.
-- Make an object type that moves around on its own. Could be like the ghosts from pacman.
-- Add sounds.
-  - When a player moves, or picks up coins.
-  - A constant sound track.
-  - A sound that plays when you first open the game.
-- Implement delta movements to only allow players to move one tile per tick. 
-  - Can play around with the tick rate when developing this.
-  - React to both pressed and released.
-  - Can enable diagonal movements.
-  - Fixes the issue caused by holding down a key, and makes for a more responsive experience.
-- Make the total game area larger than the portion of that grid we see in the game window. 
-  - So maybe the viewport moves as the player approaches an edge.
-  - Or maybe the player stays in the middle and the whole viewport moves with the player whenever the player moves.
-- Think about other keyboard keys that might perform some other action.
-  - Can be as simple as changing some colors in the game.
-  - Or maybe you've got health potions to restore player health.
-- Add more scoreboard/HUD elements.
-  - Maybe move this off of the game board itself, to some designated area on the canvas. I recommend still using just the single JPanel if you want to do this.
-- Eliminate the grid concept altogether and use pixel positions instead.
+        document.getElementById('gameForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            answers[players[currentPlayerIndex]] = Object.fromEntries(formData.entries());
+            
+            if (currentPlayerIndex < players.length - 1) {
+                currentPlayerIndex++;
+                showPlayerForm();
+            } else {
+                showResults();
+            }
+        });
 
-## ![Double Black Diamond](images/double-black-diamond.png) Expert
+        function showResults() {
+            document.getElementById('playerForm').classList.add('hidden');
+            document.getElementById('results').classList.remove('hidden');
+            
+            const resultsTable = document.getElementById('resultsTable');
+            resultsTable.innerHTML = `
+                <tr>
+                    <th>קטגוריה</th>
+                    ${players.map(player => `<th>${player}</th>`).join('')}
+                </tr>
+            `;
+            
+            categories.forEach((category, index) => {
+                let row = `<tr><td>${hebrewCategories[index]}</td>`;
+                players.forEach(player => {
+                    const answer = answers[player][category] || '-';
+                    const score = calculateScore(category, player);
+                    row += `<td class="fade-in" style="animation-delay: ${index * 0.2}s">
+                                ${answer} (${score})
+                            </td>`;
+                    scores[player] += score;
+                });
+                row += '</tr>';
+                resultsTable.innerHTML += row;
+            });
 
-To dive even deeper into developing your Java 2D game, I recommend checking out this series of tutorials for guidance and inspiration: https://zetcode.com/javagames/
+            updateScoreboard();
+        }
+
+        function calculateScore(category, player) {
+            const playerAnswer = answers[player][category].toLowerCase();
+            if (!playerAnswer || playerAnswer[0] !== currentLetter) return 0;
